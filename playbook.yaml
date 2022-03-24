@@ -1,0 +1,33 @@
+- hosts: webserver
+  become: true
+  vars:
+    server_name: "64.227.180.191"
+    document_root: /var/www/html
+    app_root: amjedsaleel.github.io   
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+    - name: Copies website files to server
+      copy:
+        src: "{{ app_root }}"
+        dest: "{{ document_root }}"
+        mode: preserve
+    - name: Create nginx config file for website
+      template:
+        src: amjedsaleel.conf
+        dest: /etc/nginx/sites-available
+    - name: Creating sybolic link for websites
+      file:
+        src: /etc/nginx/sites-available/amjedsaleel.conf
+        dest: /etc/nginx/sites-enabled/amjedsaleel.conf
+        state: link
+      notify: Restart nginx
+
+  handlers:
+    - name: Restart nginx
+      service: 
+        name: nginx
+        state: restarted
